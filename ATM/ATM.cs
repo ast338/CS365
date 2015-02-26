@@ -15,13 +15,16 @@ namespace ATM
     private Account currentAccount;
     private Bank centralBank;
     private Customer currentCustomer;
+    private int paperAmount;
 
     // Construct an ATM interface which takes in the Bank and Customer that want to communicate.
     public ATM(Bank bank, Customer customer)
     {
       InitializeComponent();
+      currentAccount = new Account();
       centralBank = bank;
       currentCustomer = customer;
+      paperAmount = 100;
     }
 
     // Withdraw money from this account.
