@@ -3,7 +3,7 @@ namespace ATM
   public class Account
   {
     private string name_;
-    private float balance_;
+    private decimal balance_;
 
     public Account()
     {
@@ -22,7 +22,7 @@ namespace ATM
         name_ = value;
       }
     }
-    public float Balance
+    public decimal Balance
     {
       get
       {
@@ -44,7 +44,7 @@ namespace ATM
         return false;
 
       return (Name == rhs.Name &&
-         (Balance > (rhs.Balance - .000000001f)) && (Balance < (rhs.Balance + .000000001f)));
+         (Balance > (rhs.Balance - .000000001M)) && (Balance < (rhs.Balance + .000000001M)));
     }
 
     public override int GetHashCode()
@@ -55,13 +55,19 @@ namespace ATM
     public static bool operator ==(Account lhs, Account rhs)
     {
       return (lhs.Name == rhs.Name &&
-         (lhs.Balance > (rhs.Balance - .000000001f)) && (lhs.Balance < (rhs.Balance + .000000001f)));
+         (lhs.Balance > (rhs.Balance - .000000001M)) && (lhs.Balance < (rhs.Balance + .000000001M)));
     }
 
     public static bool operator !=(Account lhs, Account rhs)
     {
       return (!(lhs.Name == rhs.Name &&
-         (lhs.Balance > (rhs.Balance - .000000001f)) && (lhs.Balance < (rhs.Balance + .000000001f))));
+         (lhs.Balance > (rhs.Balance - .000000001M)) && (lhs.Balance < (rhs.Balance + .000000001M))));
+    }
+
+    public override string ToString()
+    {
+      string Format = name_.ToString() + "\n" + balance_.ToString();
+      return Format;
     }
   }
 }

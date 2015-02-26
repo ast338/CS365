@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using System.IO;
+using System.Linq;
 using System;
 
 namespace ATM
@@ -23,48 +24,58 @@ namespace ATM
       return algorithm.ComputeHash(Encoding.UTF8.GetBytes(input));
     }
 
-    public bool Withdraw(Account accountName, float Money)
+    public void MoneyRefill(decimal Money)
+    {
+      Money += 1000000;
+    }
+
+    public void PaperRefill(int Paper)
+    {
+      Paper += 1000;
+    }
+
+    public bool Withdraw(Account accountName, decimal Money)
     {
       Account account = GetAccount(accountName);
 
       // Account balance must be more than the money specified.
-      if (Money > account.Balance)
+      if (decimal.Round(Money, 2) > account.Balance)
         return false;
 
       // Withdraw the amount from the account.
-      account.Balance -= Money;
+      account.Balance -= decimal.Round(Money, 2);
       return true;
     }
 
-    public void Deposit(Account accountName, float Money)
+    public void Deposit(Account accountName, decimal Money)
     {
       Account account = GetAccount(accountName);
-      account.Balance += Money;
+      account.Balance += decimal.Round(Money, 2);
     }
 
-    public float GetBalance(Account accountName)
+    public decimal GetBalance(Account accountName)
     {
       Account account = GetAccount(accountName);
       return account.Balance;
     }
 
-    public bool AccountTransfer(Account senderAccount, string receiverAccount, float Money)
+    public bool AccountTransfer(Account senderAccount, string receiverAccount, decimal Money)
     {
       // Get sender and receiving accounts.
       Account sendAccount = GetAccount(senderAccount);
       Account recAccount = GetAccount(receiverAccount);
 
       // Balance must have more than the money specified.
-      if (sendAccount.Balance < Money)
+      if (sendAccount.Balance < decimal.Round(Money, 2))
         return false;
 
       // Give money to receiving account, take it away from sending account.
-      sendAccount.Balance -= Money;
-      recAccount.Balance += Money;
+      sendAccount.Balance -= decimal.Round(Money, 2);
+      recAccount.Balance += decimal.Round(Money, 2);
       return true;
     }
 
-    public bool AuthenticateUser(string accountAttempt, string passwordAttempt)
+    public bool AuthenticateUser(string accountAttempt, string passwordAttempt, Account accountATM)
     {
       // Search for account. If it's not in the database, account does not exist.
       Account account = GetAccount(accountAttempt);
@@ -76,7 +87,10 @@ namespace ATM
       byte[] hashAttempt = GetHash(passwordAttempt);
       string hashString = Encoding.UTF8.GetString(hashAttempt);
       if (accountHashes[account.Name] == hashString)
+      {
+        accountATM = account;
         return true;
+      }
 
       return false;
     }
@@ -119,7 +133,7 @@ namespace ATM
 
             Account account = new Account();
             account.Name = AccountName;
-            account.Balance = Convert.ToSingle(AccountBalance);
+            account.Balance = Convert.ToDecimal(AccountBalance);
             accountDatabase.Add(account);
             accountHashes.Add(AccountName, AccountHash);
           }
@@ -133,7 +147,24 @@ namespace ATM
 
     public void WriteDatabaseFile(string Filename)
     {
-
+      try
+      {
+        using (StreamWriter file = new StreamWriter(Filename))
+        {
+          int hashIndex = 0;
+          foreach (Account account in accountDatabase)
+          {
+            file.WriteLine(account.ToString());
+            var hash = accountHashes.ElementAt(hashIndex);
+            file.WriteLine(hash);
+            ++hashIndex;
+          }
+        }
+      }
+      catch (Exception e)
+      {
+        
+      }
     }
   }
 }
